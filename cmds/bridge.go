@@ -26,6 +26,8 @@ import (
 
 	hue "github.com/collinux/GoHue"
 	"github.com/spf13/cobra"
+
+	"github.com/nixpanic/hue-cli/utils"
 )
 
 type BridgeOptions struct {
@@ -39,10 +41,10 @@ var (
 
 func addBridgeOptions(cmd *cobra.Command) {
 	// hue-cli --bridge=<ip-address>
-	cmd.Flags().StringVar(&bridgeOptions.ipaddress, "bridge", "",
+	cmd.Flags().StringVar(&bridgeOptions.ipaddress, "bridge", bridgeOptions.ipaddress,
 		"IP-address of the bridge (optional)")
 	// hue-cli --username=<username>
-	cmd.Flags().StringVar(&bridgeOptions.username, "username", "",
+	cmd.Flags().StringVar(&bridgeOptions.username, "username", bridgeOptions.username,
 		"username for authentication to the bridge (optional)")
 }
 
@@ -51,6 +53,19 @@ func initBridge(cmd *cobra.Command) {
 	cmd.AddCommand(cmdBridgeConfig)
 	addBridgeOptions(cmdBridgeConfig)
 	cmdBridgeConfig.SilenceUsage = true
+
+	// read the hue-cli.yaml configfile
+	config, err := utils.NewConfigFile("hue-cli.yaml")
+	if err != nil {
+		// could not find the hue-cli.yaml
+		// TODO: output for debugging only
+		fmt.Printf("failed to load hue-cli.yaml: %s\n", err)
+	} else {
+		if len(config.Bridges) > 0 {
+			bridgeOptions.ipaddress = config.Bridges[0].IPAddress
+			bridgeOptions.username = config.Bridges[0].User
+		}
+	}
 }
 
 func getBridge() (*hue.Bridge, error) {

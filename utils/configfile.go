@@ -34,6 +34,7 @@ type ConfigFile struct {
 	Bridges []BridgeConfig
 }
 
+// A BridgeConfig contains connection details for the
 type BridgeConfig struct {
 	IPAddress string `yaml:"ipaddress"`
 	User      string `yaml:"user"`
