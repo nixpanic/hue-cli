@@ -31,6 +31,7 @@ type LightOptions struct {
 	light     string
 	toggle    bool
 	colorLoop bool
+	blink     int
 }
 
 var (
@@ -52,6 +53,8 @@ func initLights(cmd *cobra.Command) {
 		"Toggle light switch")
 	cmdLight.Flags().BoolVar(&lightOptions.colorLoop, "colorloop", false,
 		"enable/disable color-loop for a light")
+	cmdLight.Flags().IntVar(&lightOptions.blink, "blink", -1,
+		"blink a light for the given number of seconds")
 	cmdLight.SilenceUsage = true
 
 }
@@ -114,6 +117,16 @@ var cmdLight = &cobra.Command{
 			action = "Deactivated"
 		}
 		fmt.Printf("%s color-loop for '%s'\n",  action, light.Name)
+
+		// TODO: split blink into its own function
+		if lightOptions.blink != -1 {
+			fmt.Printf("blinking %s for %d seconds\n",  light.Name, lightOptions.blink)
+
+			err = light.Blink(lightOptions.blink)
+			if err != nil {
+				return err
+			}
+		}
 
 		return nil
 	},
